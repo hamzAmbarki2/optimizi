@@ -1,0 +1,78 @@
+﻿- [FILE] eslint.config.js
+- [FILE] index.html
+- [FILE] MernProjectStructure.ps1
+- [FILE] package.json
+- [FILE] postcss.config.js
+- [FILE] tailwind.config.js
+- [FILE] tsconfig.app.json
+- [FILE] tsconfig.json
+- [FILE] tsconfig.node.json
+- [FILE] vite.config.ts
+- [DIR] .bolt
+  - [FILE] config.json
+  - [FILE] prompt
+- [DIR] src
+  - [FILE] App.jsx
+  - [FILE] index.css
+  - [FILE] main.jsx
+  - [FILE] vite-env.d.ts
+  - [DIR] components
+    - [DIR] auth
+      - [FILE] AuthBackground.jsx
+      - [FILE] ForgotPassword.jsx
+      - [FILE] ProfileVerificationStep.jsx
+      - [FILE] SignIn.jsx
+      - [FILE] SignUp.jsx
+      - [FILE] VerifyEmail.jsx
+    - [DIR] categories
+      - [FILE] Categories.jsx
+      - [FILE] CategoryCard.jsx
+      - [FILE] CategoryDialog.jsx
+    - [DIR] dashboard
+      - [FILE] CategoryDistribution.jsx
+      - [FILE] Dashboard.jsx
+      - [FILE] RecentOrdersTable.jsx
+      - [FILE] SalesChart.jsx
+      - [FILE] StatCard.jsx
+      - [FILE] TopSellingProductsTable.jsx
+    - [DIR] layout
+      - [FILE] Header.jsx
+      - [FILE] Layout.jsx
+      - [FILE] MainContent.jsx
+      - [FILE] Sidebar.jsx
+    - [DIR] map
+      - [FILE] MapComponent.jsx
+    - [DIR] products
+      - [FILE] ProductCard.jsx
+      - [FILE] ProductDialog.jsx
+      - [FILE] Products.jsx
+    - [DIR] profile
+      - [FILE] Profile.jsx
+    - [DIR] restaurants
+      - [FILE] MenuDialog.jsx
+      - [FILE] RestaurantCard.jsx
+      - [FILE] RestaurantDialog.jsx
+      - [FILE] Restaurants.jsx
+    - [DIR] shared
+      - [FILE] AnimatedBackground.jsx
+      - [FILE] LoadingScreen.jsx
+      - [FILE] PageTransition.jsx
+    - [DIR] users
+      - [FILE] UserCard.jsx
+      - [FILE] UserDialog.jsx
+      - [FILE] Users.jsx
+  - [DIR] contexts
+    - [FILE] AuthContext.jsx
+  - [DIR] data
+    - [FILE] categoriesData.js
+    - [FILE] dashboardData.js
+    - [FILE] productsData.js
+    - [FILE] restaurantsData.js
+    - [FILE] usersData.js
+  - [DIR] firebase
+    - [FILE] config.js
+  - [DIR] theme
+    - [FILE] theme.js
+  - [DIR] utils
+    - [FILE] firebase.js
+    - [FILE] helpers.js
