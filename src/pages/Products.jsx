@@ -5,6 +5,7 @@ import {
   Typography,
   Button,
   TextField,
+  Divider ,
   InputAdornment,
   ToggleButtonGroup,
   ToggleButton,
@@ -67,14 +68,16 @@ import { formatCurrency } from '../utils/helpers';
 import { useTheme, } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
-import { ProductModel, CategoryModel, RestaurantModel } from '../services/models';
+import { ProductModel, CategoryModel, FournisseurModel } from '../services/models';
+import { useNavigate } from 'react-router-dom';
+import FournisseurDialog from '../components/fournisseurs/FournisseurDialog'; // Assure this import is correct
 
 const Products = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const { currentUser } = useAuth();
-  const [restaurant, setRestaurant] = useState(null);
+  const [Fournisseur, setFournisseur] = useState(null);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,7 +91,6 @@ const Products = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    price: '',
     imageURL: '',
     categoryId: '',
     stockQuantity: '',
@@ -96,35 +98,41 @@ const Products = () => {
     tags: [],
     discount: '',
     unit: '',
+    tva: 19,
+    prixHTVA: '',
+    prixTTC: '',
+    // review: [] // <-- intentionally omitted for admin
   });
+  const [openFournisseurDialog, setOpenFournisseurDialog] = React.useState(false);
+  const navigate = useNavigate();
 
-  // Fetch the user's restaurant
+  // Fetch the user's Fournisseur
   useEffect(() => {
-    const fetchRestaurant = async () => {
+    const fetchFournisseur = async () => {
       if (!currentUser) return;
       setLoading(true);
       try {
-        const querySnapshot = await RestaurantModel.getByOwner(currentUser.uid);
+        const querySnapshot = await FournisseurModel.getByOwner(currentUser.uid);
         if (!querySnapshot.empty) {
-          setRestaurant({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() });
+          setFournisseur({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() });
         } else {
-          setRestaurant(null);
+          setFournisseur(null);
         }
       } catch (err) {
-        setRestaurant(null);
+        setFournisseur(null);
       }
       setLoading(false);
     };
-    fetchRestaurant();
+    fetchFournisseur();
   }, [currentUser]);
 
-  // Fetch products for this restaurant
+  // Fetch products for this Fournisseur
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!restaurant) return;
+      if (!Fournisseur) return;
       setLoading(true);
       try {
-        const querySnapshot = await ProductModel.getByRestaurant(restaurant.id);
+        const querySnapshot = await ProductModel.getByFournisseur(Fournisseur.id);
         setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } catch (err) {
         setProducts([]);
@@ -132,14 +140,14 @@ const Products = () => {
       setLoading(false);
     };
     fetchProducts();
-  }, [restaurant]);
+  }, [Fournisseur]);
 
-  // Fetch categories for the restaurant
+  // Fetch categories for the Fournisseur
   useEffect(() => {
     const fetchCategories = async () => {
-      if (!restaurant) return;
+      if (!Fournisseur) return;
       try {
-        const querySnapshot = await CategoryModel.getByRestaurant(restaurant.id);
+        const querySnapshot = await CategoryModel.getByFournisseur(Fournisseur.id);
         const categoriesData = [];
         querySnapshot.forEach((doc) => {
           categoriesData.push({ id: doc.id, ...doc.data() });
@@ -150,7 +158,7 @@ const Products = () => {
       }
     };
     fetchCategories();
-  }, [restaurant]);
+  }, [Fournisseur]);
 
   const handleOpenDialog = (product = null) => {
     setEditingProduct(product);
@@ -159,7 +167,6 @@ const Products = () => {
         ? {
             title: product.title,
             description: product.description,
-            price: product.price,
             imageURL: product.imageURL,
             categoryId: product.categoryId,
             stockQuantity: product.stockQuantity,
@@ -167,11 +174,13 @@ const Products = () => {
             tags: product.tags || [],
             discount: product.discount,
             unit: product.unit,
+            tva: product.tva || 19,
+            prixHTVA: product.prixHTVA || '',
+            prixTTC: product.prixTTC || '',
           }
         : {
             title: '',
             description: '',
-            price: '',
             imageURL: '',
             categoryId: '',
             stockQuantity: '',
@@ -179,6 +188,9 @@ const Products = () => {
             tags: [],
             discount: '',
             unit: '',
+            tva: 19,
+            prixHTVA: '',
+            prixTTC: '',
           }
     );
     setOpenDialog(true);
@@ -190,7 +202,6 @@ const Products = () => {
     setFormData({
       title: '',
       description: '',
-      price: '',
       imageURL: '',
       categoryId: '',
       stockQuantity: '',
@@ -198,38 +209,60 @@ const Products = () => {
       tags: [],
       discount: '',
       unit: '',
+      tva: 19,
+      prixHTVA: '',
+      prixTTC: '',
     });
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
+    let newFormData = {
+      ...formData,
       [name]: type === 'checkbox' ? checked : value,
-    }));
+    };
+
+    if (name === 'prixHTVA' || name === 'tva') {
+      const prixHTVA = parseFloat(name === 'prixHTVA' ? value : newFormData.prixHTVA) || 0;
+      const tva = parseFloat(name === 'tva' ? value : newFormData.tva) || 0;
+      newFormData.prixTTC = (prixHTVA * (1 + tva / 100)).toFixed(3);
+    }
+    if (name === 'prixTTC') {
+      const prixTTC = parseFloat(value) || 0;
+      const tva = parseFloat(newFormData.tva) || 0;
+      newFormData.prixHTVA = tva !== 0 ? (prixTTC / (1 + tva / 100)).toFixed(3) : prixTTC.toFixed(3);
+    }
+
+    setFormData(newFormData);
   };
 
   const handleSaveProduct = async () => {
     if (!formData.title.trim() || !formData.categoryId) return;
+    const prixHTVA = parseFloat(formData.prixHTVA) || 0;
+    const tva = parseFloat(formData.tva) || 0;
+    const prixTTC = (prixHTVA * (1 + tva / 100)).toFixed(3);
+
+    const productData = {
+      ...formData,
+      prixHTVA: prixHTVA.toFixed(3),
+      tva: tva,
+      prixTTC: prixTTC,
+      FournisseurId: Fournisseur.id,
+      updatedAt: new Date().toISOString(),
+      ...(editingProduct ? {} : { createdAt: new Date().toISOString() }),
+    };
+
+    // Supprime le champ price
+    delete productData.price;
+
     if (editingProduct) {
-      // Update
-      await ProductModel.update(editingProduct.id, {
-        ...formData,
-        restaurantId: restaurant.id,
-        updatedAt: new Date().toISOString(),
-      });
+      await ProductModel.update(editingProduct.id, productData);
     } else {
-      // Add
-      await ProductModel.create({
-        ...formData,
-        restaurantId: restaurant.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+      await ProductModel.create(productData);
     }
     handleCloseDialog();
     // Refresh products
-    const querySnapshot = await ProductModel.getByRestaurant(restaurant.id);
+    const querySnapshot = await ProductModel.getByFournisseur(Fournisseur.id);
     setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
 
@@ -305,21 +338,30 @@ const Products = () => {
     );
   }
 
-  // No restaurant state
-  if (!restaurant) {
+  // No Fournisseur state
+  if (!Fournisseur) {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
-          You need to create a restaurant before adding any products.
+          Vous devez créer un fournisseur avant d'ajouter des produits.
         </Alert>
         <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
           <Typography variant="h6" color="textSecondary" sx={{ mb: 2 }}>
-            No restaurant found
+            Aucun fournisseur trouvé
           </Typography>
-          <Button variant="contained" color="primary" startIcon={<AddIcon />}>
-            Create Restaurant
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setOpenFournisseurDialog(true)}
+          >
+            Créer un fournisseur
           </Button>
         </Paper>
+        <FournisseurDialog
+          open={openFournisseurDialog}
+          onClose={() => setOpenFournisseurDialog(false)}
+        />
       </Box>
     );
   }
@@ -348,24 +390,29 @@ const Products = () => {
       }}>
         <Box>
           <Typography variant={isMobile ? "h5" : "h4"} component="h1" sx={{ fontWeight: 800 }}>
-            Products
+            Produits
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Manage your restaurant's products
+            Gérez les produits de votre fournisseur
           </Typography>
         </Box>
         <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-          sx={{ 
-            minWidth: isMobile ? '100%' : 'auto',
-            mt: isMobile ? 1 : 0
-          }}
-        >
-          Add Product
-        </Button>
+           variant="contained"
+           color="primary"
+           startIcon={<AddIcon />}
+           onClick={() => handleOpenDialog()}
+           sx={{ 
+             borderRadius: 3, 
+             px: 3, 
+             py: 1.5,
+             boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+             '&:hover': {
+               boxShadow: '0 6px 14px rgba(25, 118, 210, 0.4)',
+             }
+           }}
+         >
+           Ajouter un produit
+         </Button>
       </Box>
 
       {/* Search and Filters */}
@@ -382,7 +429,7 @@ const Products = () => {
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={isMobile ? 12 : 5}>
             <TextField
-              placeholder="Search products..."
+              placeholder="Rechercher des produits..."
               value={searchTerm}
               onChange={handleSearchChange}
               fullWidth
@@ -411,7 +458,7 @@ const Products = () => {
           </Grid>
           <Grid item xs={6} sm={isMobile ? 6 : 2}>
             <FormControl fullWidth size="small">
-              <InputLabel id="category-filter-label">Category</InputLabel>
+              <InputLabel id="category-filter-label">Catégorie</InputLabel>
               <Select
                 labelId="category-filter-label"
                 id="category-filter"
@@ -426,7 +473,7 @@ const Products = () => {
                   }
                 }}
               >
-                <MenuItem value="">All Categories</MenuItem>
+                <MenuItem value="">Toutes les catégories</MenuItem>
                 {categories.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
                     <Chip 
@@ -445,7 +492,7 @@ const Products = () => {
           </Grid>
           <Grid item xs={6} sm={isMobile ? 6 : 2}>
             <FormControl fullWidth size="small">
-              <InputLabel id="status-filter-label">Status</InputLabel>
+              <InputLabel id="status-filter-label">Statut</InputLabel>
               <Select
                 labelId="status-filter-label"
                 id="status-filter"
@@ -454,9 +501,9 @@ const Products = () => {
                 onChange={handleStatusFilterChange}
                 sx={{ borderRadius: 20 }}
               >
-                <MenuItem value="">All Statuses</MenuItem>
-                <MenuItem value="Available">Available</MenuItem>
-                <MenuItem value="Out of Stock">Out of Stock</MenuItem>
+                <MenuItem value="">Tous les statuts</MenuItem>
+                <MenuItem value="Available">Disponible</MenuItem>
+                <MenuItem value="Out of Stock">Rupture</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -474,7 +521,7 @@ const Products = () => {
               size="small"
               sx={{ borderRadius: 20 }}
             >
-              Clear Filters
+              Réinitialiser les filtres
             </Button>
             <ToggleButtonGroup
               value={viewMode}
@@ -503,14 +550,14 @@ const Products = () => {
       {/* Products Count and Filter Summary */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
         <Chip 
-          label={`${filteredProducts.length} products`} 
+          label={`${filteredProducts.length} produit${filteredProducts.length > 1 ? 's' : ''}`} 
           size="small" 
           color="info"
           variant="outlined"
         />
         {categoryFilter && (
           <Chip 
-            label={`Category: ${categories.find(c => c.id === categoryFilter)?.title}`} 
+            label={`Catégorie : ${categories.find(c => c.id === categoryFilter)?.title}`} 
             size="small"
             onDelete={() => setCategoryFilter('')}
             deleteIcon={<CloseIcon fontSize="small" />}
@@ -518,7 +565,7 @@ const Products = () => {
         )}
         {statusFilter && (
           <Chip 
-            label={`Status: ${statusFilter}`} 
+            label={`Statut : ${statusFilter === 'Available' ? 'Disponible' : 'Rupture'}`} 
             size="small"
             onDelete={() => setStatusFilter('')}
             deleteIcon={<CloseIcon fontSize="small" />}
@@ -526,7 +573,7 @@ const Products = () => {
         )}
         {searchTerm && (
           <Chip 
-            label={`Search: "${searchTerm}"`} 
+            label={`Recherche : "${searchTerm}"`} 
             size="small"
             onDelete={() => setSearchTerm('')}
             deleteIcon={<CloseIcon fontSize="small" />}
@@ -540,13 +587,13 @@ const Products = () => {
           <Box sx={{ maxWidth: 400, margin: '0 auto' }}>
      
             <Typography variant="h6" sx={{ mb: 1 }}>
-              No products found
+              Aucun produit trouvé
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Try adjusting your search or filter criteria
+              Essayez de modifier vos critères de recherche ou de filtre
             </Typography>
             <Button variant="outlined" onClick={clearFilters}>
-              Clear all filters
+              Réinitialiser tous les filtres
             </Button>
           </Box>
         </Paper>
@@ -554,7 +601,6 @@ const Products = () => {
         <Grid container spacing={3}>
           {filteredProducts.map((product) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-              {/* Pass categories to ProductCard if needed */}
               <ProductCard
                 product={product}
                 onEdit={handleOpenDialog}
@@ -579,15 +625,16 @@ const Products = () => {
               <Table size="medium">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Product</TableCell>
-                    <TableCell>Category</TableCell>
+                    <TableCell>Produit</TableCell>
+                    <TableCell>Catégorie</TableCell>
                     <TableCell>Description</TableCell>
-                    <TableCell align="right">Price</TableCell>
+                    <TableCell align="right">Prix</TableCell>
                     <TableCell align="right">Stock</TableCell>
-                    <TableCell align="center">Discount</TableCell>
-                    <TableCell align="center">Unit</TableCell>
+                    <TableCell align="center">Remise</TableCell>
+                    <TableCell align="center">Unité</TableCell>
                     <TableCell align="center">Tags</TableCell>
-                    <TableCell align="center">Available</TableCell>
+                    <TableCell align="center">Disponible</TableCell>
+                    <TableCell align="center">Avis</TableCell>
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -624,7 +671,13 @@ const Products = () => {
                       </TableCell>
                       <TableCell align="right">
                         <Typography variant="body2" fontWeight="bold" color="primary.main">
-                          {formatCurrency(product.price)}
+                          {Number(product.prixHTVA).toFixed(3)} DT HT
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          TVA: {product.tva}%
+                        </Typography>
+                        <Typography variant="body2" fontWeight="bold" color="success.main">
+                          {Number(product.prixTTC).toFixed(3)} DT TTC
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
@@ -645,11 +698,27 @@ const Products = () => {
                       </TableCell>
                       <TableCell align="center">
                         <Chip
-                          label={product.isAvailable ? 'Yes' : 'No'}
+                          label={product.isAvailable ? 'Oui' : 'Non'}
                           size="small"
                           color={product.isAvailable ? 'success' : 'error'}
                         />
                       </TableCell>
+                      <TableCell align="center">
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Avis
+                        </Typography>
+                        {product.review && product.review.length > 0 ? (
+                          <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                            {product.review.length} avis
+                          </Typography>
+                        ) : (
+                          <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                            Aucun avis
+                          </Typography>
+                        )}
+                      </Box>
+                    </TableCell>
                       <TableCell align="right">
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                           <Tooltip title="View">
@@ -680,12 +749,12 @@ const Products = () => {
 
       {/* Add/Edit Product Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
+        <DialogTitle>{editingProduct ? 'Modifier le produit' : 'Ajouter un produit'}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <TextField
-                label="Title"
+                label="Titre"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
@@ -694,23 +763,7 @@ const Products = () => {
                 margin="normal"
               />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Price"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                fullWidth
-                required
-                type="number"
-                margin="normal"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
+
             <Grid item xs={12}>
               <TextField
                 label="Description"
@@ -725,7 +778,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
-                label="Image URL"
+                label="URL de l'image"
                 name="imageURL"
                 value={formData.imageURL}
                 onChange={handleChange}
@@ -735,7 +788,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Category</InputLabel>
+                <InputLabel>Catégorie</InputLabel>
                 <Select
                   name="categoryId"
                   value={formData.categoryId}
@@ -743,7 +796,7 @@ const Products = () => {
                   label="Category"
                   required
                 >
-                  <MenuItem value="">Select Category</MenuItem>
+                  <MenuItem value="">Sélectionner une catégorie</MenuItem>
                   {categories.map((cat) => (
                     <MenuItem key={cat.id} value={cat.id}>{cat.title}</MenuItem>
                   ))}
@@ -752,7 +805,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
-                label="Stock Quantity"
+                label="Quantité en stock"
                 name="stockQuantity"
                 value={formData.stockQuantity}
                 onChange={handleChange}
@@ -763,7 +816,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
-                label="Discount"
+                label="Remise"
                 name="discount"
                 value={formData.discount}
                 onChange={handleChange}
@@ -778,7 +831,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
-                label="Unit"
+                label="Unité"
                 name="unit"
                 value={formData.unit}
                 onChange={handleChange}
@@ -788,7 +841,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
-                label="Tags (comma separated)"
+                label="Tags (séparés par des virgules)"
                 name="tags"
                 value={formData.tags.join(', ')}
                 onChange={e => setFormData(prev => ({
@@ -808,7 +861,7 @@ const Products = () => {
                 borderRadius: 1,
                 mt: 1
               }}>
-                <Typography sx={{ flex: 1 }}>Available for sale</Typography>
+                <Typography sx={{ flex: 1 }}>Disponible à la vente</Typography>
                 <Box
                   component="input"
                   type="checkbox"
@@ -823,19 +876,59 @@ const Products = () => {
                 />
               </Box>
             </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="TVA (%)"
+                name="tva"
+                value={formData.tva}
+                onChange={handleChange}
+                fullWidth
+                required
+                margin="normal"
+                helperText="Taux de TVA en Tunisie (exemple : 19)"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Prix HTVA (hors taxe)"
+                name="prixHTVA"
+                value={formData.prixHTVA}
+                onChange={handleChange}
+                fullWidth
+                required
+                margin="normal"
+                helperText="Saisissez le prix hors taxe. Le prix TTC sera calculé automatiquement."
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Prix TTC"
+                name="prixTTC"
+                value={formData.prixTTC}
+                onChange={handleChange}
+                fullWidth
+                required
+                margin="normal"
+                helperText="Le prix TTC est calculé automatiquement selon la TVA."
+              />
+            </Grid>
           </Grid>
+          <Box sx={{ mt: 2, color: 'info.main', fontSize: '0.95rem' }}>
+            Le prix TTC (Toutes Taxes Comprises) est calculé selon la formule tunisienne : <br />
+            <b>Prix TTC = Prix HTVA × (1 + TVA/100)</b>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>Annuler</Button>
           <Button onClick={handleSaveProduct} variant="contained" disabled={!formData.title.trim() || !formData.categoryId}>
-            {editingProduct ? 'Update' : 'Add'}
+            {editingProduct ? 'Mettre à jour' : 'Ajouter'}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* View Product Details Dialog */}
       <Dialog open={!!viewProduct} onClose={() => setViewProduct(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Product Details</DialogTitle>
+        <DialogTitle>Détails du produit</DialogTitle>
         <DialogContent>
           {viewProduct && (
             <Box>
@@ -868,8 +961,14 @@ const Products = () => {
                     {viewProduct.description}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Typography variant="h5" color="primary" fontWeight={800}>
-                      {formatCurrency(viewProduct.price)}
+                    <Typography variant="body2" color="primary.main" sx={{ fontWeight: 700 }}>
+                      HTVA : {viewProduct.prixHTVA !== undefined && viewProduct.prixHTVA !== null && viewProduct.prixHTVA !== '' ? Number(viewProduct.prixHTVA).toFixed(3) : '0.000'} DT
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      TVA : {viewProduct.tva !== undefined && viewProduct.tva !== null && viewProduct.tva !== '' ? viewProduct.tva : '0'} %
+                    </Typography>
+                    <Typography variant="h6" color="success.main" sx={{ fontWeight: 800 }}>
+                      TTC : {viewProduct.prixTTC !== undefined && viewProduct.prixTTC !== null && viewProduct.prixTTC !== '' ? Number(viewProduct.prixTTC).toFixed(3) : '0.000'} DT
                     </Typography>
                     {viewProduct.discount && (
                       <Chip 
@@ -889,7 +988,7 @@ const Products = () => {
                 <Grid item xs={6}>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Category
+                      Catégorie
                     </Typography>
                     <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
                       <CategoryIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
@@ -900,7 +999,7 @@ const Products = () => {
                 <Grid item xs={6}>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Stock Quantity
+                      Quantité en stock
                     </Typography>
                     <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
                       <StockIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
@@ -911,7 +1010,7 @@ const Products = () => {
                 <Grid item xs={6}>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Unit
+                      Unité
                     </Typography>
                     <Typography variant="body2">
                       {viewProduct.unit || 'N/A'}
@@ -921,7 +1020,7 @@ const Products = () => {
                 <Grid item xs={6}>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Availability
+                      Disponibilité
                     </Typography>
                     <Typography 
                       variant="body2" 
@@ -934,12 +1033,12 @@ const Products = () => {
                       {viewProduct.isAvailable ? (
                         <>
                           <AvailableIcon fontSize="small" sx={{ mr: 1 }} />
-                          Available
+                          Disponible
                         </>
                       ) : (
                         <>
                           <UnavailableIcon fontSize="small" sx={{ mr: 1 }} />
-                          Out of Stock
+                          Rupture
                         </>
                       )}
                     </Typography>
@@ -947,26 +1046,27 @@ const Products = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Tags
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Avis des clients
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                      {viewProduct.tags && viewProduct.tags.length > 0 ? (
-                        viewProduct.tags.map((tag, index) => (
-                          <Chip
-                            key={index}
-                            label={tag}
-                            size="small"
-                            sx={{
-                              borderRadius: 1,
-                              backgroundColor: theme.palette.action.selected,
-                            }}
-                          />
-                        ))
-                      ) : (
-                        <Typography variant="body2">No tags</Typography>
-                      )}
-                    </Box>
+                    {viewProduct.review && viewProduct.review.length > 0 ? (
+                      <Box sx={{ mt: 0.5 }}>
+                        {viewProduct.review.slice(0, 3).map((r, idx) => (
+                          <Typography key={idx} variant="caption" sx={{ fontStyle: 'italic', mb: 0.5, display: 'block' }}>
+                            {typeof r === 'string' ? r : r?.comment || JSON.stringify(r)}
+                          </Typography>
+                        ))}
+                        {viewProduct.review.length > 3 && (
+                          <Typography variant="caption" color="primary.main">
+                            ...et {viewProduct.review.length - 3} autres avis
+                          </Typography>
+                        )}
+                      </Box>
+                    ) : (
+                      <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
+                        Aucun avis pour ce produit.
+                      </Typography>
+                    )}
                   </Box>
                 </Grid>
               </Grid>
@@ -974,7 +1074,7 @@ const Products = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewProduct(null)}>Close</Button>
+          <Button onClick={() => setViewProduct(null)}>Fermer</Button>
         </DialogActions>
       </Dialog>
     </Box>

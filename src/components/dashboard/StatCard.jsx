@@ -64,7 +64,7 @@ const StatCard = ({ title, value, icon, change, prefix = '', isMonetary = false,
                         </Typography>
                         <Chip
                             icon={isPositive ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />}
-                            label={`${isPositive ? '+' : ''}${change.toFixed(1)}%`}
+                            label={`${isPositive ? '+' : ''}${change.toFixed(1)}% ${isPositive ? 'hausse' : 'baisse'}`}
                             color={isPositive ? 'success' : 'error'}
                             size="small"
                             sx={{

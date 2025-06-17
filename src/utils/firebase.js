@@ -15,11 +15,11 @@ import { db } from '../firebase/config';
 // User CRUD operations
 export const userService = {
   // Create a new user
-  create: async (userData, restaurantOwnerId) => {
+  create: async (userData, FournisseurOwnerId) => {
     try {
       const docRef = await addDoc(collection(db, 'users'), {
         ...userData,
-        restaurantOwnerId,
+        FournisseurOwnerId,
         role: 'user',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -31,12 +31,12 @@ export const userService = {
     }
   },
 
-  // Get all users for a restaurant owner
-  getByRestaurantOwner: async (restaurantOwnerId) => {
+  // Get all users for a Fournisseur owner
+  getByFournisseurOwner: async (FournisseurOwnerId) => {
     try {
       const q = query(
         collection(db, 'users'),
-        where('restaurantOwnerId', '==', restaurantOwnerId),
+        where('FournisseurOwnerId', '==', FournisseurOwnerId),
         where('role', '==', 'user'),
         orderBy('createdAt', 'desc')
       );
@@ -76,12 +76,12 @@ export const userService = {
     }
   },
 
-  // Check user count for a restaurant owner
-  getUserCount: async (restaurantOwnerId) => {
+  // Check user count for a Fournisseur owner
+  getUserCount: async (FournisseurOwnerId) => {
     try {
       const q = query(
         collection(db, 'users'),
-        where('restaurantOwnerId', '==', restaurantOwnerId),
+        where('FournisseurOwnerId', '==', FournisseurOwnerId),
         where('role', '==', 'user')
       );
       const querySnapshot = await getDocs(q);

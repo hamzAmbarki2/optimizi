@@ -1,10 +1,15 @@
 import { db } from '../../firebase/config';
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
 
+// Correction des champs utilisateur pour correspondre au formulaire/dialog
 export const userFields = {
-  name: '',
+  fullName: '',
   email: '',
-  role: '',
+  password: '',
+  phone: '',
+  cin: '',
+  imageUrl: '',
+  status: 'Active',
   createdAt: '',
   updatedAt: '',
 };

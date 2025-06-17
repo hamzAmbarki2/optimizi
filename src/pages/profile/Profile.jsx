@@ -19,7 +19,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { updateEmail, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebase/config';
-import MapComponent from '../../components/map/MapComponent';
 
 export default function Profile() {
   const { currentUser } = useAuth();
@@ -190,8 +189,7 @@ export default function Profile() {
                   </Box>
 
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    Enter a URL to update your profile picture
-                  </Typography>
+Entrez une URL pour mettre à jour votre photo de profil                  </Typography>
                   <TextField
                       fullWidth
                       label="Image URL"
@@ -242,14 +240,8 @@ export default function Profile() {
 
                   <Divider sx={{ my: 4 }} />
                   
-                  {/* Map Component for Address Selection */}
-                  <Typography variant="subtitle1" gutterBottom>
-                    Your Address
-                  </Typography>
-                  <MapComponent 
-                    onAddressSelected={handleAddressSelected} 
-                    initialAddress={formData.address}
-                  />
+            
+                  
 
                   <Button
                       type="submit"
@@ -257,8 +249,8 @@ export default function Profile() {
                       startIcon={<Save size={20} />}
                       sx={{ mt: 4 }}
                   >
-                    Save Changes
-                  </Button>
+
+Enregistrer les modifications                  </Button>
                 </Box>
             )}
 

@@ -59,7 +59,7 @@ export default function ForgotPassword() {
         setLoading(true);
 
         if (!email) {
-            setError('Please enter your email address');
+            setError('Veuillez saisir votre adresse e-mail');
             setLoading(false);
             return;
         }
@@ -67,9 +67,9 @@ export default function ForgotPassword() {
         try {
             await sendPasswordResetEmail(auth, email);
             setEmailSent(true);
-            setMessage('Check your email for password reset instructions');
+            setMessage('Consultez votre boîte mail pour les instructions de réinitialisation');
         } catch (error) {
-            console.error('Password reset error:', error);
+            console.error('Erreur lors de la réinitialisation :', error);
             setError(getErrorMessage(error.code));
         } finally {
             setLoading(false);
@@ -79,15 +79,15 @@ export default function ForgotPassword() {
     const getErrorMessage = (errorCode) => {
         switch (errorCode) {
             case 'auth/user-not-found':
-                return 'No account found with this email address.';
+                return 'Aucun compte trouvé avec cette adresse e-mail.';
             case 'auth/invalid-email':
-                return 'Invalid email address.';
+                return 'Adresse e-mail invalide.';
             case 'auth/too-many-requests':
-                return 'Too many requests. Please try again later.';
+                return 'Trop de tentatives. Veuillez réessayer plus tard.';
             case 'auth/network-request-failed':
-                return 'Network error. Please check your connection.';
+                return 'Erreur réseau. Vérifiez votre connexion.';
             default:
-                return 'An error occurred. Please try again.';
+                return 'Une erreur est survenue. Veuillez réessayer.';
         }
     };
 
@@ -97,7 +97,7 @@ export default function ForgotPassword() {
 
         try {
             await sendPasswordResetEmail(auth, email);
-            setMessage('Password reset email sent again');
+            setMessage("L'e-mail de réinitialisation a été renvoyé");
         } catch (error) {
             setError(getErrorMessage(error.code));
         } finally {
@@ -117,7 +117,6 @@ export default function ForgotPassword() {
                 overflow: 'hidden',
             }}
         >
-            {/* Animated Circles */}
             <AnimatedCircle size={300} initialX={-150} initialY={-50} duration={8} delay={0} />
             <AnimatedCircle size={400} initialX={-200} initialY={200} duration={10} delay={0.5} />
             <AnimatedCircle size={250} initialX={window.innerWidth - 100} initialY={100} duration={7} delay={0.2} />
@@ -159,14 +158,14 @@ export default function ForgotPassword() {
                             <ArrowLeft size={20} />
                         </Link>
                         <Typography variant="h4" component="h1" fontWeight="bold">
-                            Reset Password
+                            Réinitialiser le mot de passe
                         </Typography>
                     </Box>
 
                     {!emailSent ? (
                         <>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-                                Enter your email address and we'll send you a link to reset your password.
+                                Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.
                             </Typography>
 
                             {error && (
@@ -187,7 +186,7 @@ export default function ForgotPassword() {
                                     required
                                     fullWidth
                                     id="email"
-                                    label="Email Address"
+                                    label="Adresse e-mail"
                                     name="email"
                                     autoComplete="email"
                                     autoFocus
@@ -210,15 +209,15 @@ export default function ForgotPassword() {
                                     {loading ? (
                                         <>
                                             <CircularProgress size={20} sx={{ mr: 1 }} />
-                                            Sending...
+                                            Envoi en cours...
                                         </>
                                     ) : (
-                                        'Send Reset Email'
+                                        'Envoyer le lien de réinitialisation'
                                     )}
                                 </Button>
 
                                 <Typography variant="body2" align="center">
-                                    Remember your password?{' '}
+                                    Vous vous souvenez de votre mot de passe ?{' '}
                                     <Link
                                         component={RouterLink}
                                         to="/signin"
@@ -228,7 +227,7 @@ export default function ForgotPassword() {
                                             '&:hover': { textDecoration: 'underline' },
                                         }}
                                     >
-                                        Sign In
+                                        Se connecter
                                     </Link>
                                 </Typography>
                             </Box>
@@ -240,11 +239,11 @@ export default function ForgotPassword() {
                             </Box>
 
                             <Typography variant="h6" gutterBottom>
-                                Check Your Email
+                                Vérifiez votre boîte mail
                             </Typography>
 
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                                We've sent a password reset link to <strong>{email}</strong>
+                                Nous avons envoyé un lien de réinitialisation à <strong>{email}</strong>
                             </Typography>
 
                             {message && (
@@ -271,10 +270,10 @@ export default function ForgotPassword() {
                                 {loading ? (
                                     <>
                                         <CircularProgress size={16} sx={{ mr: 1 }} />
-                                        Resending...
+                                        Nouvel envoi...
                                     </>
                                 ) : (
-                                    'Resend Email'
+                                    "Renvoyer l’e-mail"
                                 )}
                             </Button>
 
@@ -288,7 +287,7 @@ export default function ForgotPassword() {
                                         '&:hover': { textDecoration: 'underline' },
                                     }}
                                 >
-                                    Back to Sign In
+                                    Retour à la connexion
                                 </Link>
                             </Typography>
                         </Box>

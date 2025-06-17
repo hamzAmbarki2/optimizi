@@ -28,7 +28,7 @@ import {
 } from '@mui/icons-material';
 import { formatCurrency } from '../../utils/helpers';
 
-const MenuDialog = ({ open, onClose, restaurant, onSave }) => {
+const MenuDialog = ({ open, onClose, Fournisseur, onSave }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
@@ -40,10 +40,10 @@ const MenuDialog = ({ open, onClose, restaurant, onSave }) => {
   });
 
   useEffect(() => {
-    if (restaurant && restaurant.menu) {
-      setMenuItems([...restaurant.menu]);
+    if (Fournisseur && Fournisseur.menu) {
+      setMenuItems([...Fournisseur.menu]);
     }
-  }, [restaurant]);
+  }, [Fournisseur]);
 
   const handleAddItem = () => {
     setEditMode(true);
@@ -106,7 +106,7 @@ const MenuDialog = ({ open, onClose, restaurant, onSave }) => {
   };
 
   const handleSaveMenu = () => {
-    onSave({ ...restaurant, menu: menuItems });
+    onSave({ ...Fournisseur, menu: menuItems });
     onClose();
   };
 
@@ -121,7 +121,7 @@ const MenuDialog = ({ open, onClose, restaurant, onSave }) => {
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">
-            {restaurant?.name} - Menu Management
+            {Fournisseur?.name} - Menu Management
           </Typography>
           <IconButton onClick={onClose} size="small">
             <CloseIcon />

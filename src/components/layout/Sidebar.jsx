@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, NavLink } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import {
   Drawer,
@@ -25,6 +25,8 @@ import {
   Group as GroupIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -87,13 +89,14 @@ const Sidebar = ({ open, handleDrawerToggle, drawerWidth }) => {
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
     { text: 'Products', icon: <InventoryIcon />, path: '/products' },
-    { text: 'Restaurants', icon: <RestaurantIcon />, path: '/restaurants' },
+    { text: 'Fournisseurs', icon: <RestaurantIcon />, path: '/Fournisseurs' },
     { text: 'Users', icon: <GroupIcon />, path: '/users' },
   ];
 
   const secondaryItems = [
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
+
 
   return (
       <DrawerStyled variant="permanent" open={open} drawerwidth={drawerWidth}>
@@ -111,7 +114,7 @@ const Sidebar = ({ open, handleDrawerToggle, drawerWidth }) => {
                   R
                 </Avatar>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Restaurant Admin
+                  Fournisseur Admin
                 </Typography>
               </Box>
           ) : null}
@@ -243,6 +246,10 @@ const Sidebar = ({ open, handleDrawerToggle, drawerWidth }) => {
               </ListItem>
           ))}
         </List>
+
+        <Divider />
+
+        
       </DrawerStyled>
   );
 };

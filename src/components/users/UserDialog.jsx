@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import MapComponent from '../../components/map/MapComponent';
 
 const UserDialog = ({ open, onClose, onSave, user }) => {
   const [formData, setFormData] = useState({
@@ -63,11 +62,6 @@ const UserDialog = ({ open, onClose, onSave, user }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddressSelected = (address) => {
-    setFormData(prev => ({ ...prev, address }));
-    if (error) setError('');
-  };
-
   const isEditMode = Boolean(user);
 
   const validateForm = () => {
@@ -108,16 +102,10 @@ const UserDialog = ({ open, onClose, onSave, user }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>{isEditMode ? 'Edit User' : 'Add New User'}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{user ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur'}</DialogTitle>
       <DialogContent>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Grid container spacing={3} sx={{ mt: 0.5 }}>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12}>
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
               Basic Information
@@ -195,16 +183,6 @@ const UserDialog = ({ open, onClose, onSave, user }) => {
           </Grid>
           
           <Grid item xs={12}>
-            <Typography variant="subtitle1" gutterBottom>
-              Address
-            </Typography>
-            <MapComponent 
-              onAddressSelected={handleAddressSelected} 
-              initialAddress={formData.address}
-            />
-          </Grid>
-          
-          <Grid item xs={12}>
             <TextField
               select
               name="status"
@@ -222,9 +200,13 @@ const UserDialog = ({ open, onClose, onSave, user }) => {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? <CircularProgress size={20} /> : user ? 'Update' : 'Add'}
+        <Button onClick={onClose}>Annuler</Button>
+        <Button 
+          onClick={handleSubmit} 
+          variant="contained"
+          disabled={!formData.fullName || !formData.email || !formData.cin || !formData.phone}
+        >
+          {user ? 'Mettre à jour' : 'Ajouter'}
         </Button>
       </DialogActions>
     </Dialog>

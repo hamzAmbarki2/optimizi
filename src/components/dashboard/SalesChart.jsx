@@ -138,7 +138,7 @@ const SalesChart = ({ data }) => {
           mb: 3
         }}>
           <Typography variant="h6" component="h2" sx={{fontWeight: 700}}>
-            Sales Overview
+            Vue d'ensemble des ventes
           </Typography>
           <Box sx={{display: 'flex', gap: 1}}>
             <Button
@@ -151,7 +151,7 @@ const SalesChart = ({ data }) => {
                   py: 0.5
                 }}
             >
-              Monthly
+              Mensuel
             </Button>
             <Button
                 variant="text"
@@ -163,7 +163,7 @@ const SalesChart = ({ data }) => {
                   py: 0.5
                 }}
             >
-              Weekly
+              Hebdomadaire
             </Button>
           </Box>
         </Box>

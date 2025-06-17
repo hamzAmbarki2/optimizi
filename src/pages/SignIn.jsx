@@ -161,10 +161,10 @@ export default function SignIn() {
                     }}
                 >
                     <Typography variant="h4" component="h1" gutterBottom align="center" fontWeight="bold">
-                        Welcome Back
+Content de te revoir
                     </Typography>
                     <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
-                        Sign in to continue to your dashboard
+                       Connectez-vous pour continuer vers votre tableau de bord
                     </Typography>
 
                     {error && (
@@ -282,7 +282,7 @@ export default function SignIn() {
                         </Box>
 
                         <Typography variant="body2" align="center">
-                            Don't have an account?{' '}
+                            Vous n'avez pas de compte ?{' '}
                             <Link
                                 component={RouterLink}
                                 to="/signup"

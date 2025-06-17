@@ -141,7 +141,7 @@ function MapComponent({ onAddressSelected, initialAddress = null }) {
   return (
     <Box sx={{ mb: 3 }}>
       <Typography variant="subtitle1" sx={{ mb: 1 }}>
-        Select Your Address on the Map
+        Sélectionnez votre adresse sur la carte
       </Typography>
 
       {/* Search Input */}
@@ -208,8 +208,8 @@ function MapComponent({ onAddressSelected, initialAddress = null }) {
         bgcolor: 'background.paper'
       }}>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          Selected Address:
-        </Typography>
+
+Adresse sélectionnée :        </Typography>
         {loading ? (
           <Typography variant="body2">Loading address...</Typography>
         ) : error ? (

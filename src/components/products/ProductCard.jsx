@@ -10,7 +10,6 @@ import {
   Stack,
   useTheme,
   useMediaQuery,
-  Badge,
   Menu,
   MenuItem,
   ListItemIcon
@@ -28,6 +27,7 @@ import {
   Inventory as InventoryIcon
 } from '@mui/icons-material';
 import { formatCurrency } from '../../utils/helpers';
+import { format } from 'date-fns';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
@@ -46,13 +46,16 @@ const DiscountBadge = styled(Chip)(({ theme }) => ({
   position: 'absolute',
   top: 12,
   left: 12,
-  backgroundColor: theme.palette.error.main,
+  backgroundColor: theme.palette.error.main, // Changed to red
   color: theme.palette.error.contrastText,
   fontWeight: 'bold',
   fontSize: '0.75rem',
   padding: theme.spacing(0.5),
-  borderRadius: '4px',
-  zIndex: 1,
+  borderRadius: '50%', // Changed to circular
+  zIndex: 2,
+  minWidth: 36, // Ensure circular shape
+  height: 36, // Ensure circular shape
+  justifyContent: 'center', // Center content
 }));
 
 const StatusBadge = styled(Chip)(({ theme }) => ({
@@ -95,16 +98,23 @@ const ProductCard = ({ product, onEdit, onDelete, onView, categories }) => {
     if (onView) onView(product);
   };
 
-  const discountPercentage = product.comparePrice 
-    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) 
+  const discountPercentage = product.comparePrice && product.comparePrice > 0
+    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
     : 0;
 
   const hasDiscount = discountPercentage > 0;
   const isLowStock = product.stockQuantity < 10;
 
   return (
-    <StyledCard onClick={handleView} sx={{ cursor: 'pointer' }}>
+    <StyledCard onClick={() => onView && onView(product)} sx={{ cursor: 'pointer', position: 'relative' }}>
       <Box sx={{ position: 'relative', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
+        {/* Badge de réduction circulaire */}
+        {hasDiscount && (
+          <DiscountBadge 
+            label={`-${discountPercentage}%`} 
+            size="small"
+          />
+        )}
         <CardMedia
           component="img"
           height={isMobile ? 160 : 200}
@@ -119,27 +129,16 @@ const ProductCard = ({ product, onEdit, onDelete, onView, categories }) => {
             }
           }}
         />
-        
-        {/* Discount Badge */}
-        {hasDiscount && (
-          <DiscountBadge 
-            label={`${discountPercentage}% OFF`} 
-            size="small" 
-            icon={<LocalOfferIcon fontSize="inherit" />}
-          />
-        )}
-        
-        {/* Availability Badge */}
+        {/* Badge de disponibilité */}
         <StatusBadge
-          label={product.isAvailable ? "Available" : "Out of Stock"}
+          label={product.isAvailable ? "Disponible" : "Rupture"}
           size="small"
           color={product.isAvailable ? "success" : "error"}
           icon={product.isAvailable ? 
             <CheckCircleIcon fontSize="inherit" /> : 
             <CancelIcon fontSize="inherit" />}
         />
-        
-        {/* Action Menu */}
+        {/* Menu d'actions */}
         <IconButton
           aria-label="settings"
           sx={{
@@ -161,18 +160,18 @@ const ProductCard = ({ product, onEdit, onDelete, onView, categories }) => {
         </IconButton>
       </Box>
       
-      <CardContent sx={{ flexGrow: 1, p: isMobile ? 1.5 : 2 }}>
-        {/* Category */}
+      <CardContent sx={{ flexGrow: 1, p: isMobile ? 1.5 : 2, position: 'relative', pb: 6 }}>
+        {/* Catégorie */}
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
           <CategoryIcon fontSize="small" color="action" />
           <Chip 
-            label={categories?.find(c => c.id === product.categoryId)?.title || 'Uncategorized'} 
+            label={categories?.find(c => c.id === product.categoryId)?.title || 'Non catégorisé'} 
             size="small" 
             variant="outlined"
           />
         </Stack>
         
-        {/* Title */}
+        {/* Titre */}
         <Typography 
           variant={isMobile ? "subtitle1" : "h6"} 
           component="h3" 
@@ -205,27 +204,27 @@ const ProductCard = ({ product, onEdit, onDelete, onView, categories }) => {
           {product.description}
         </Typography>
         
-        {/* Price */}
+        {/* Prix */}
         <Stack 
           direction={isMobile ? 'column' : 'row'} 
           alignItems={isMobile ? 'flex-start' : 'center'} 
           spacing={1}
           sx={{ mb: 1.5 }}
         >
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 800 }}>
-              {formatCurrency(product.price)}
+          <Stack direction="column" alignItems="flex-start" spacing={0.5}>
+            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 700 }}>
+              HTVA : {Number(product.prixHTVA).toFixed(3)} DT
             </Typography>
-            
-            {product.comparePrice > 0 && (
-              <Typography variant="body2" color="text.disabled" sx={{ textDecoration: 'line-through' }}>
-                {formatCurrency(product.comparePrice)}
-              </Typography>
-            )}
+            <Typography variant="body2" color="text.secondary">
+              TVA : {product.tva} %
+            </Typography>
+            <Typography variant="h6" color="success.main" sx={{ fontWeight: 800 }}>
+              TTC : {Number(product.prixTTC).toFixed(3)} DT
+            </Typography>
           </Stack>
         </Stack>
         
-        {/* Stock & Unit */}
+        {/* Stock et unité */}
         <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
           <Stack direction="row" alignItems="center" spacing={0.5}>
             <InventoryIcon fontSize="small" color={isLowStock ? "error" : "action"} />
@@ -234,7 +233,7 @@ const ProductCard = ({ product, onEdit, onDelete, onView, categories }) => {
               color={isLowStock ? "error" : "text.secondary"}
               sx={{ fontWeight: isLowStock ? 700 : 500 }}
             >
-              Stock: {product.stockQuantity} {isLowStock && '• Low'}
+              Stock : {product.stockQuantity} {isLowStock && '• Faible'}
             </Typography>
           </Stack>
           
@@ -263,9 +262,52 @@ const ProductCard = ({ product, onEdit, onDelete, onView, categories }) => {
             ))}
           </Box>
         )}
+        
+        {/* Review (always show, even if empty) */}
+        <Box sx={{ mt: 1.5 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Avis des clients :
+          </Typography>
+          {product.review && product.review.length > 0 ? (
+            <Stack direction="column" spacing={0.5}>
+              {product.review.slice(0, 2).map((r, idx) => (
+                <Typography key={idx} variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  {typeof r === 'string' ? r : r?.comment || JSON.stringify(r)}
+                </Typography>
+              ))}
+              {product.review.length > 2 && (
+                <Typography variant="caption" color="primary.main">
+                  ...et {product.review.length - 2} autres avis
+                </Typography>
+              )}
+            </Stack>
+          ) : (
+            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+              Aucun avis pour ce produit.
+            </Typography>
+          )}
+        </Box>
+        
+        {/* Date de création en bas à droite */}
+        <Box
+          sx={{
+            position: 'absolute',
+            right: 16,
+            bottom: 8,
+            color: 'text.secondary',
+            fontSize: '0.75rem',
+            opacity: 0.7,
+          }}
+        >
+          {product.createdAt && (
+            <>
+              Ajouté le : {format(new Date(product.createdAt), 'yyyy-MM-dd')}
+            </>
+          )}
+        </Box>
       </CardContent>
       
-      {/* Action Menu */}
+      {/* Menu d'actions */}
       <Menu
         anchorEl={anchorEl}
         open={open}
@@ -283,19 +325,19 @@ const ProductCard = ({ product, onEdit, onDelete, onView, categories }) => {
           <ListItemIcon>
             <VisibilityIcon fontSize="small" />
           </ListItemIcon>
-          <Typography variant="body2">View Details</Typography>
+          <Typography variant="body2">Voir détails</Typography>
         </MenuItem>
         <MenuItem onClick={handleEdit}>
           <ListItemIcon>
             <EditIcon fontSize="small" />
           </ListItemIcon>
-          <Typography variant="body2">Edit</Typography>
+          <Typography variant="body2">Modifier</Typography>
         </MenuItem>
         <MenuItem onClick={handleDelete}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" />
           </ListItemIcon>
-          <Typography variant="body2">Delete</Typography>
+          <Typography variant="body2">Supprimer</Typography>
         </MenuItem>
       </Menu>
     </StyledCard>

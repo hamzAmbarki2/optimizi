@@ -111,6 +111,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
               >
                 {user.email}
               </Typography>
+
             </Box>
           </Box>
           <IconButton 
@@ -142,11 +143,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
             label="CIN" 
             value={user.cin} 
           />
-          <DetailItem 
-            icon={<HomeIcon fontSize="small" />} 
-            label="Address" 
-            value={user.address || 'N/A'} 
-          />
+    
           <DetailItem 
             icon={<LockIcon fontSize="small" />} 
             label="Password" 

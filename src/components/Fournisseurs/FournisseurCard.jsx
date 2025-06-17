@@ -30,7 +30,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
+const FournisseurCard = ({ Fournisseur, onEdit, onDelete }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -44,14 +44,14 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
 
   const handleEdit = () => {
     handleClose();
-    if (onEdit) onEdit(restaurant);
+    if (onEdit) onEdit(Fournisseur);
   };
 
   const handleDelete = () => {
     handleClose();
     if (onDelete) {
-      console.log('Delete restaurant triggered:', restaurant.id); // Already present
-      onDelete(restaurant);
+      console.log('Delete Fournisseur triggered:', Fournisseur.id); // Already present
+      onDelete(Fournisseur);
     }
   };
 
@@ -61,8 +61,8 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
         <CardMedia
           component="img"
           height="180"
-          image={restaurant.image || '/placeholder.jpg'}
-          alt={restaurant.name}
+          image={Fournisseur.image || '/placeholder.jpg'}
+          alt={Fournisseur.name}
           sx={{ objectFit: 'cover' }}
         />
         <Box
@@ -85,12 +85,12 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
             <MoreVertIcon fontSize="small" />
           </IconButton>
           <Menu
-            id={`menu-${restaurant.id}`}
+            id={`menu-${Fournisseur.id}`}
             anchorEl={anchorEl}
             open={open}
             onClose={handleClose}
             MenuListProps={{
-              'aria-labelledby': 'restaurant-menu-button',
+              'aria-labelledby': 'Fournisseur-menu-button',
             }}
           >
             <MenuItem onClick={handleEdit}>
@@ -110,10 +110,10 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
       </Box>
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography variant="h6" component="h2" gutterBottom>
-          {restaurant.name}
+          {Fournisseur.name}
         </Typography>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Matricule Fiscale: {restaurant.matriculeFiscale}
+          Matricule Fiscale: {Fournisseur.matriculeFiscale}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
@@ -121,9 +121,9 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
           </Typography>
           <Box>
             <Typography variant="body2" color="text.secondary">
-              {restaurant.address}
+              {Fournisseur.address}
             </Typography>
-            {restaurant.useUserAddress && (
+            {Fournisseur.useUserAddress && (
               <Chip
                 icon={<SyncIcon fontSize="small" />}
                 label="Synced with your profile"
@@ -136,12 +136,12 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete }) => {
           </Box>
         </Box>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Opening Hours: {restaurant.openingHours}
+          Opening Hours: {Fournisseur.openingHours}
         </Typography>
       </CardContent>
     </StyledCard>
   );
 };
 
-export default RestaurantCard;
+export default FournisseurCard;
 

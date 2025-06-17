@@ -77,6 +77,7 @@ const ProductDialog = ({ open, onClose, onSave, product }) => {
     status: 'Active',
     featured: false,
     tags: [],
+    // review: [] // <-- intentionally omitted for admin
   });
 
   const [newTag, setNewTag] = useState('');
@@ -97,6 +98,7 @@ const ProductDialog = ({ open, onClose, onSave, product }) => {
         status: product.status || 'Active',
         featured: product.featured !== undefined ? product.featured : false,
         tags: product.tags || [],
+        // review: product.review || [] // <-- intentionally omitted for admin
       });
     } else {
       setFormData({
@@ -110,6 +112,7 @@ const ProductDialog = ({ open, onClose, onSave, product }) => {
         status: 'Active',
         featured: false,
         tags: [],
+        // review: [] // <-- intentionally omitted for admin
       });
     }
     setNewTag('');
@@ -176,9 +179,10 @@ const ProductDialog = ({ open, onClose, onSave, product }) => {
     const selectedCategory = categoriesData.categories.find(
       (cat) => cat.id === formData.category
     );
-    
+    // Remove review if present (admin can't set it)
+    const { review, ...formDataWithoutReview } = formData;
     onSave({
-      ...formData,
+      ...formDataWithoutReview,
       id: product?.id || `prod-${Date.now()}`,
       price: Number(formData.price),
       comparePrice: Number(formData.comparePrice) || Number(formData.price),

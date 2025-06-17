@@ -33,7 +33,7 @@ const Users = () => {
     try {
       setLoading(true);
       setError('');
-      const q = query(collection(db, 'users'), where('restaurantOwner', '==', currentUser.uid));
+      const q = query(collection(db, 'users'), where('FournisseurOwner', '==', currentUser.uid));
       const querySnapshot = await getDocs(q);
       const usersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUsers(usersData);
@@ -71,7 +71,7 @@ const Users = () => {
     try {
       const dataWithTimestamps = {
         ...userData,
-        restaurantOwner: currentUser.uid,
+        FournisseurOwner: currentUser.uid,
         updatedAt: new Date().toISOString(),
         ...(selectedUser ? {} : { createdAt: new Date().toISOString() }),
       };
@@ -103,10 +103,24 @@ const Users = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Users Management
+          Gestion des utilisateurs
         </Typography>
-        <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAddUser}>
-          Add User
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => handleAddUser()}
+          sx={{ 
+            borderRadius: 3, 
+            px: 3, 
+            py: 1.5,
+            boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+            '&:hover': {
+              boxShadow: '0 6px 14px rgba(25, 118, 210, 0.4)',
+            }
+          }}
+        >
+          Ajouter un utilisateur
         </Button>
       </Box>
       {error && <Paper sx={{ p: 2, mb: 2, bgcolor: 'error.light' }}><Typography color="error">{error}</Typography></Paper>}
@@ -115,7 +129,9 @@ const Users = () => {
         {users.length === 0 ? (
           <Grid item xs={12}>
             <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography>No users found. Add your first user!</Typography>
+              <Typography>
+                Aucun utilisateur trouvé. Ajoutez votre premier utilisateur !
+              </Typography>
             </Paper>
           </Grid>
         ) : (

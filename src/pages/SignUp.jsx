@@ -15,7 +15,6 @@ import {
 import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../contexts/AuthContext';
-import MapComponent from '../components/map/MapComponent';
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -29,7 +28,9 @@ export default function SignUp() {
         password: '',
         confirmPassword: '',
         imageUrl: '',
-        address: '',
+        fullName: '',
+        phone: '',
+        cin: '',
     });
 
     const handleChange = (e) => {
@@ -38,46 +39,47 @@ export default function SignUp() {
         if (error) setError('');
     };
 
-    const handleAddressSelected = (address) => {
-        setFormData(prev => ({ ...prev, address }));
-        if (error) setError('');
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
-        if (!formData.email || !formData.password || !formData.confirmPassword || !formData.address) {
-            setError('Please fill in all required fields');
+        if (!formData.email || !formData.password || !formData.confirmPassword || !formData.fullName || !formData.phone || !formData.cin) {
+            setError('Veuillez remplir tous les champs obligatoires');
             return;
         }
 
         if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            setError('Please enter a valid email address');
+            setError('Veuillez saisir une adresse e-mail valide');
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('Password should be at least 6 characters long');
+            setError('Le mot de passe doit comporter au moins 6 caractères');
             return;
         }
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            setError('Les mots de passe ne correspondent pas');
             return;
         }
 
         setLoading(true);
 
         try {
-            // Pass the address to the signup function
-            await signup(formData.email, formData.password, formData.imageUrl, formData.address);
-            enqueueSnackbar('Account created successfully!', { variant: 'success' });
+            await signup(
+                formData.email,
+                formData.password,
+                formData.imageUrl,
+                formData.fullName,
+                formData.phone,
+                formData.cin
+            );
+            enqueueSnackbar('Compte créé avec succès !', { variant: 'success' });
             navigate('/');
         } catch (error) {
             console.error('Sign up error:', error);
-            setError(error.message || 'Failed to create account');
-            enqueueSnackbar(error.message || 'Failed to create account', { variant: 'error' });
+            setError(error.message || 'Échec de la création du compte');
+            enqueueSnackbar(error.message || 'Échec de la création du compte', { variant: 'error' });
         } finally {
             setLoading(false);
         }
@@ -116,10 +118,10 @@ export default function SignUp() {
                     }}
                 >
                     <Typography variant="h4" component="h1" gutterBottom align="center" fontWeight="bold">
-                        Create Account
+                        Créer un compte
                     </Typography>
                     <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
-                        Join us to get started with your dashboard
+                        Rejoignez-nous pour commencer avec votre tableau de bord
                     </Typography>
 
                     {error && (
@@ -137,11 +139,11 @@ export default function SignUp() {
                         </Box>
                         <TextField
                             fullWidth
-                            label="Profile Image URL (optional)"
+                            label="URL de l'image de profil (optionnel)"
                             name="imageUrl"
                             value={formData.imageUrl}
                             onChange={handleChange}
-                            placeholder="https://example.com/image.jpg"
+                            placeholder="https://exemple.com/image.jpg"
                             sx={{ mb: 3 }}
                         />
 
@@ -149,11 +151,45 @@ export default function SignUp() {
                             margin="normal"
                             required
                             fullWidth
+                            id="fullName"
+                            label="Nom complet"
+                            name="fullName"
+                            autoComplete="name"
+                            value={formData.fullName}
+                            onChange={handleChange}
+                            disabled={loading}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="phone"
+                            label="Téléphone"
+                            name="phone"
+                            autoComplete="tel"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            disabled={loading}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="cin"
+                            label="CIN"
+                            name="cin"
+                            value={formData.cin}
+                            onChange={handleChange}
+                            disabled={loading}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
                             id="email"
-                            label="Email Address"
+                            label="Adresse e-mail"
                             name="email"
                             autoComplete="email"
-                            autoFocus
                             value={formData.email}
                             onChange={handleChange}
                             disabled={loading}
@@ -163,7 +199,7 @@ export default function SignUp() {
                             required
                             fullWidth
                             name="password"
-                            label="Password"
+                            label="Mot de passe"
                             type="password"
                             id="password"
                             autoComplete="new-password"
@@ -176,7 +212,7 @@ export default function SignUp() {
                             required
                             fullWidth
                             name="confirmPassword"
-                            label="Confirm Password"
+                            label="Confirmer le mot de passe"
                             type="password"
                             id="confirmPassword"
                             autoComplete="new-password"
@@ -187,12 +223,6 @@ export default function SignUp() {
                         />
 
                         <Divider sx={{ my: 3 }} />
-                        
-                        {/* Map Component for Address Selection */}
-                        <MapComponent 
-                          onAddressSelected={handleAddressSelected}
-                          initialAddress={formData.address}
-                        />
 
                         <Button
                             type="submit"
@@ -203,13 +233,13 @@ export default function SignUp() {
                             disabled={loading}
                             startIcon={loading ? <CircularProgress size={20} /> : null}
                         >
-                            {loading ? 'Creating Account...' : 'Sign Up'}
+                            {loading ? 'Création du compte...' : 'S\'inscrire'}
                         </Button>
 
                         <Typography variant="body2" align="center">
-                            Already have an account?{' '}
+                            Vous avez déjà un compte ?{' '}
                             <Link component={RouterLink} to="/signin">
-                                Sign In
+                                Se connecter
                             </Link>
                         </Typography>
                     </Box>

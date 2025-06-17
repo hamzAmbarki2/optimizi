@@ -11,9 +11,9 @@ import {
   Divider,
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-import MapComponent from '../../components/map/MapComponent';
+import MapComponent from '../map/MapComponent';
 
-const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
+const FournisseurDialog = ({ open, onClose, onSave, Fournisseur }) => {
   const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
     matriculeFiscale: '',
@@ -23,16 +23,16 @@ const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
     openingHours: '',
   });
 
-  const isEditMode = Boolean(restaurant);
+  const isEditMode = Boolean(Fournisseur);
 
   useEffect(() => {
-    if (restaurant) {
+    if (Fournisseur) {
       setFormData({
-        matriculeFiscale: restaurant.matriculeFiscale || '',
-        image: restaurant.image || '',
-        name: restaurant.name || '',
-        address: restaurant.address || '',
-        openingHours: restaurant.openingHours || '',
+        matriculeFiscale: Fournisseur.matriculeFiscale || '',
+        image: Fournisseur.image || '',
+        name: Fournisseur.name || '',
+        address: Fournisseur.address || '',
+        openingHours: Fournisseur.openingHours || '',
       });
     } else {
       setFormData({
@@ -43,7 +43,7 @@ const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
         openingHours: '',
       });
     }
-  }, [restaurant]);
+  }, [Fournisseur]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,10 +64,10 @@ const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
     const now = new Date().toISOString();
     onSave({
       ...formData,
-      id: restaurant?.id || `rest-${Date.now()}`,
-      createdAt: restaurant?.createdAt || now,
+      id: Fournisseur?.id || `rest-${Date.now()}`,
+      createdAt: Fournisseur?.createdAt || now,
       updatedAt: now,
-      restaurantOwner: currentUser?.uid || '',
+      FournisseurOwner: currentUser?.uid || '',
     });
     onClose();
   };
@@ -80,11 +80,11 @@ const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
       fullWidth
       PaperProps={{ elevation: 3 }}
     >
-      <DialogTitle>{isEditMode ? 'Edit Restaurant' : 'Create Your Restaurant'}</DialogTitle>
+      <DialogTitle>{isEditMode ? 'Edit Fournisseur' : 'Create Your Fournisseur'}</DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 1 }}>
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Restaurant Information
+            Fournisseur Information
           </Typography>
           <Divider sx={{ mb: 2 }} />
         </Box>
@@ -105,12 +105,12 @@ const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
             onChange={handleChange}
             fullWidth
             required
-            helperText="Enter a valid URL for the restaurant image"
+            helperText="Enter a valid URL for the Fournisseur image"
             sx={{ mb: 3 }}
           />
           <TextField
             name="name"
-            label="Restaurant Name"
+            label="Fournisseur Name"
             value={formData.name}
             onChange={handleChange}
             fullWidth
@@ -127,25 +127,12 @@ const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
             placeholder="e.g., 11:00 AM - 10:00 PM"
             sx={{ mb: 3 }}
           />
-          <TextField
-            label="Restaurant Owner"
-            value={
-              currentUser?.displayName ||
-              currentUser?.name ||
-              currentUser?.email ||
-              ''
-            }
-            fullWidth
-            InputProps={{
-              readOnly: true,
-            }}
-            sx={{ mb: 3 }}
-          />
+       
 
           <Divider sx={{ my: 3 }} />
 
           <Typography variant="subtitle1" gutterBottom>
-            Restaurant Address
+            Fournisseur Address
           </Typography>
           <MapComponent
             onAddressSelected={handleAddressSelected}
@@ -173,4 +160,4 @@ const RestaurantDialog = ({ open, onClose, onSave, restaurant }) => {
   );
 };
 
-export default RestaurantDialog;
+export default FournisseurDialog;

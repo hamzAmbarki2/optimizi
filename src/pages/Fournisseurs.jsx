@@ -15,59 +15,59 @@ import {
   DialogActions,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import RestaurantCard from '../components/restaurants/RestaurantCard';
-import RestaurantDialog from '../components/restaurants/RestaurantDialog';
+import FournisseurCard from '../components/Fournisseurs/FournisseurCard';
+import FournisseurDialog from '../components/fournisseurs/FournisseurDialog';
 import { useAuth } from '../contexts/AuthContext';
-import { RestaurantModel, ProductModel, CategoryModel } from '../services/models';
+import { FournisseurModel, ProductModel, CategoryModel } from '../services/models';
 
-const Restaurants = () => {
+const Fournisseurs = () => {
   const { currentUser } = useAuth();
-  const [restaurant, setRestaurant] = useState(null);
+  const [Fournisseur, setFournisseur] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
-  const [currentRestaurant, setCurrentRestaurant] = useState(null);
+  const [currentFournisseur, setCurrentFournisseur] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [deleting, setDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Fetch the user's restaurant from Firestore
-  const fetchRestaurant = async () => {
+  // Fetch the user's Fournisseur from Firestore
+  const fetchFournisseur = async () => {
     if (!currentUser) return;
     setLoading(true);
     try {
-      const querySnapshot = await RestaurantModel.getByOwner(currentUser.uid);
+      const querySnapshot = await FournisseurModel.getByOwner(currentUser.uid);
       if (!querySnapshot.empty) {
-        setRestaurant({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() });
+        setFournisseur({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() });
       } else {
-        setRestaurant(null);
+        setFournisseur(null);
       }
     } catch (err) {
-      setRestaurant(null);
+      setFournisseur(null);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchRestaurant();
+    fetchFournisseur();
     // eslint-disable-next-line
   }, [currentUser]);
 
   // Handle add/edit dialog open
-  const handleAddRestaurant = () => {
-    setCurrentRestaurant(null);
+  const handleAddFournisseur = () => {
+    setCurrentFournisseur(null);
     setOpenDialog(true);
   };
 
-  const handleEditRestaurant = (restaurant) => {
-    setCurrentRestaurant(restaurant);
+  const handleEditFournisseur = (Fournisseur) => {
+    setCurrentFournisseur(Fournisseur);
     setOpenDialog(true);
   };
 
-  // Handle restaurant save/update
-  const handleSaveRestaurant = async (data) => {
-    if (restaurant) {
-      // Always fetch the latest restaurant doc by ownerId
-      const querySnapshot = await RestaurantModel.getByOwner(currentUser.uid);
+  // Handle Fournisseur save/update
+  const handleSaveFournisseur = async (data) => {
+    if (Fournisseur) {
+      // Always fetch the latest Fournisseur doc by ownerId
+      const querySnapshot = await FournisseurModel.getByOwner(currentUser.uid);
       if (!querySnapshot.empty) {
         const docId = querySnapshot.docs[0].id;
         const currentData = querySnapshot.docs[0].data();
@@ -79,51 +79,51 @@ const Restaurants = () => {
         });
         updatedFields.updatedAt = new Date().toISOString();
         if (Object.keys(updatedFields).length > 0) {
-          await RestaurantModel.update(docId, updatedFields);
+          await FournisseurModel.update(docId, updatedFields);
         }
       }
     } else {
-      await RestaurantModel.create({
+      await FournisseurModel.create({
         ...data,
         ownerId: currentUser.uid,
-        restaurantOwner: currentUser.uid,
+        FournisseurOwner: currentUser.uid,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
     }
     setOpenDialog(false);
-    await fetchRestaurant(); // Refresh after save/update
+    await fetchFournisseur(); // Refresh after save/update
   };
 
   // Open confirmation dialog instead of window.confirm
-  const handleDeleteRestaurant = () => {
+  const handleDeleteFournisseur = () => {
     setConfirmOpen(true);
   };
 
   // Actual delete logic
-  const confirmDeleteRestaurant = async () => {
+  const confirmDeleteFournisseur = async () => {
     setConfirmOpen(false);
     setDeleting(true);
     try {
-      // Always fetch the latest restaurant doc by ownerId
-      const querySnapshot = await RestaurantModel.getByOwner(currentUser.uid);
+      // Always fetch the latest Fournisseur doc by ownerId
+      const querySnapshot = await FournisseurModel.getByOwner(currentUser.uid);
       if (querySnapshot.empty) {
-        setSnackbar({ open: true, message: 'Restaurant does not exist or was already deleted.', severity: 'warning' });
+        setSnackbar({ open: true, message: 'Fournisseur does not exist or was already deleted.', severity: 'warning' });
         setDeleting(false);
         return;
       }
-      const restaurantDoc = querySnapshot.docs[0];
-      const restaurantId = restaurantDoc.id;
+      const FournisseurDoc = querySnapshot.docs[0];
+      const FournisseurId = FournisseurDoc.id;
       // Use ProductModel and CategoryModel for related deletes
-      await ProductModel.deleteByRestaurant(restaurantId);
-      await CategoryModel.deleteByRestaurant(restaurantId);
-      await RestaurantModel.delete(restaurantId);
-      setRestaurant(null);
-      await fetchRestaurant();
-      setSnackbar({ open: true, message: 'Restaurant and all associated products and categories deleted successfully!', severity: 'success' });
+      await ProductModel.deleteByFournisseur(FournisseurId);
+      await CategoryModel.deleteByFournisseur(FournisseurId);
+      await FournisseurModel.delete(FournisseurId);
+      setFournisseur(null);
+      await fetchFournisseur();
+      setSnackbar({ open: true, message: 'Fournisseur and all associated products and categories deleted successfully!', severity: 'success' });
     } catch (error) {
-      console.error("Error deleting restaurant recursively:", error);
-      setSnackbar({ open: true, message: `Failed to delete restaurant: ${error.message}`, severity: 'error' });
+      console.error("Error deleting Fournisseur recursively:", error);
+      setSnackbar({ open: true, message: `Failed to delete Fournisseur: ${error.message}`, severity: 'error' });
     } finally {
       setDeleting(false);
     }
@@ -133,16 +133,16 @@ const Restaurants = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          My Restaurant
+          My Fournisseur
         </Typography>
-        {!restaurant && (
+        {!Fournisseur && (
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={handleAddRestaurant}
+            onClick={handleAddFournisseur}
           >
-            Create Restaurant
+            Create Fournisseur
           </Button>
         )}
       </Box>
@@ -157,9 +157,9 @@ const Restaurants = () => {
         }}
       >
         <Typography>
-          {restaurant
-            ? 'You can edit your restaurant below.'
-            : 'You have not created a restaurant yet.'}
+          {Fournisseur
+            ? 'Vous pouvez modifier votre Fournisseur ci-dessous.'
+            : "Vous n'avez pas encore créé de Fournisseur."}
         </Typography>
       </Paper>
 
@@ -168,25 +168,25 @@ const Restaurants = () => {
           <CircularProgress />
         </Box>
       ) : (
-        restaurant && (
+        Fournisseur && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={8} md={6} lg={5}>
-              <RestaurantCard
-                restaurant={restaurant}
-                onEdit={handleEditRestaurant}
-                onDelete={handleDeleteRestaurant}
+              <FournisseurCard
+                Fournisseur={Fournisseur}
+                onEdit={handleEditFournisseur}
+                onDelete={handleDeleteFournisseur}
               />
             </Grid>
           </Grid>
         )
       )}
 
-      {/* Add/Edit Restaurant Dialog */}
-      <RestaurantDialog
+      {/* Add/Edit Fournisseur Dialog */}
+      <FournisseurDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
-        onSave={handleSaveRestaurant}
-        restaurant={currentRestaurant || restaurant}
+        onSave={handleSaveFournisseur}
+        Fournisseur={currentFournisseur || Fournisseur}
       />
 
       <Snackbar
@@ -208,14 +208,14 @@ const Restaurants = () => {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this restaurant? All products and categories will also be deleted.
+            Are you sure you want to delete this Fournisseur? All products and categories will also be deleted.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={confirmDeleteRestaurant} color="error" autoFocus>
+          <Button onClick={confirmDeleteFournisseur} color="error" autoFocus>
             Delete
           </Button>
         </DialogActions>
@@ -224,4 +224,4 @@ const Restaurants = () => {
   );
 };
 
-export default Restaurants;
+export default Fournisseurs;

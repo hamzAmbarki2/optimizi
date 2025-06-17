@@ -31,14 +31,14 @@ const Dashboard = () => {
               fontSize: { xs: '1.75rem', sm: '2rem' }
             }}
         >
-          Dashboard Overview
+          Tableau de bord
         </Typography>
 
         {/* Stats Row */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} lg={3}>
             <StatCard
-                title="Total Revenue"
+                title="Chiffre d'affaires total"
                 value={metrics.revenue.value}
                 icon={<AttachMoneyIcon sx={{ color: 'white', fontSize: '1.5rem' }} />}
                 change={metrics.revenue.change}
@@ -48,7 +48,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
             <StatCard
-                title="Orders"
+                title="Commandes"
                 value={metrics.orders.value}
                 icon={<ShoppingCartIcon sx={{ color: 'white', fontSize: '1.5rem' }} />}
                 change={metrics.orders.change}
@@ -57,7 +57,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
             <StatCard
-                title="Products"
+                title="Produits"
                 value={metrics.products.value}
                 icon={<InventoryIcon sx={{ color: 'white', fontSize: '1.5rem' }} />}
                 change={metrics.products.change}
@@ -66,7 +66,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
             <StatCard
-                title="Customers"
+                title="Clients"
                 value={metrics.customers.value}
                 icon={<PeopleIcon sx={{ color: 'white', fontSize: '1.5rem' }} />}
                 change={metrics.customers.change}

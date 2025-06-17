@@ -8,7 +8,7 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Categories from './pages/Categories';
 import Products from './pages/Products';
-import Restaurants from './pages/Restaurants';
+import Fournisseurs from './pages/Fournisseurs';
 import Users from './pages/Users';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -85,7 +85,7 @@ function AppContent() {
                                 <Route path="/" element={<Dashboard />} />
                                 <Route path="/categories" element={<Categories />} />
                                 <Route path="/products" element={<Products />} />
-                                <Route path="/restaurants" element={<Restaurants />} />
+                                <Route path="/Fournisseurs" element={<Fournisseurs />} />
                                 <Route path="/users" element={<Users />} />
                                 <Route path="/profile" element={<Profile />} />
                                 {/* Add the new test route here */}
